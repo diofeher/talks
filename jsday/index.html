@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>ES6: Consertando as partes ruins do JavaScript</title>
+
+    <meta name="description" content="ES6: Consertando as partes ruins do JavaScript">
+    <meta name="author" content="Diógenes Fernandes">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+
+        <section>
+            <h1>ES6</h1>
+            <h3>Consertando as partes ruins do JavaScript</h3>
+            <p>
+                <small>
+                  <a href="http://www.diofeher.net/">Diógenes Fernandes</a> / <a
+                        href="http://twitter.com/diofeher">@diofeher</a> /
+                        Software Engineer at  <a href="http://robotsandrockets.co/">Robots + Rockets</a>
+                      </small>
+            </p>
+        </section>
+
+        <section>
+            <h1>Implementação da linguagem</h1>
+            <p>Brendan Eich foi contratado pela Netscape</p>
+            <!-- Contar essa história aqui -->
+            <!-- http://www.computer.org/csdl/mags/co/2012/02/mco2012020007.html -->
+        </section>
+
+        <section>
+            <h1>ECMAScript</h1>
+            <p>Um pouco de história</p>
+        </section>
+
+        <section>
+            <h2>ES6 ou ECMAScript 2015</h2>
+            <p>Especificação finalizada em Junho/2015</p>
+        </section>
+
+        <section>
+            <h1>Implementação em andamento</h1>
+            <p><a href="https://kangax.github.io/compat-table/es6/">https://kangax.github.io/compat-table/es6/</a></p>
+        </section>
+
+        <section data-background="images/support.png">
+        </section>
+
+        <section>
+            <h2>Comparação de Objetos (ES5)</h2>
+            <pre><code data-trim class="js">
+“7” == 7  // true
+“7” === 7 // false
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Comparação de Objetos (ES5)</h2>
+            <pre><code data-trim class="js">
+NaN == NaN  // false
+NaN === NaN  // false
+var result = isNan(NaN) // true
+            </code></pre>
+            <!-- Explicar com isso -->
+            <!-- http://stackoverflow.com/questions/2801601/why-does-typeof-nan-return-number -->
+        </section>
+
+        <section data-background="images/wat-game.gif">
+        </section>
+
+        <section>
+            <h2>Object.is to the rescue!</h2>
+            <pre><code data-trim class="javascript">
+Object.is(7, ”7”) // false
+Object.is(7, 7) // true
+Object.is(NaN, NaN) // true
+            </code></pre>
+        </section>
+
+        <section>
+            <h1>Strings <em>Multi-linha</em></h1>
+            <pre><code data-trim class="javascript">
+var test = "Aqui temos uma\n" +
+"string que \n" +
+"tem várias linhas."
+            </code></pre>
+        </section>
+
+        <section data-background="images/wtf.gif">
+        </section>
+
+        <section>
+            <h2>Novas strings <em>Multi-linha</em></h2>
+            <pre><code data-trim class="javascript">
+var test = `Aqui podemos 
+escrever utilizando uma nova linha
+e o JS irá reconhecer.`
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Interpolação de <em>strings</em> (ES5)</h2>
+            <pre><code data-trim class="javascript">
+// Usando o operador +
+var name = 'Diógenes';
+var profession = 'programador';
+var hi = 'Oi, eu sou o ' + name +' e sou ' + profession';
+console.log(hi); // Oi, eu sou o Diógenes e sou programador
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Interpolação de <em>strings</em> (ES6)</h2>
+            <pre><code data-trim class="javascript">
+var name = 'Diógenes';
+var profession = 'programador';
+var hi = 'Oi, eu sou o ${name} e sou ${profession}';
+console.log(hi); // Oi, eu sou o Diógenes e sou programador
+            </code></pre>
+        </section>
+
+         <section>
+            <h2><em>Destructuring</em> (ES5)</h2>
+            <pre><code data-trim class="javascript">
+var data = {
+    "url": "http://twitter.com/api/",
+    "username": "diofeher",
+    "password": "javascript"
+};
+
+function apiRequest(data) {
+    var url = data.url,
+        username = data.username,
+        password = data.password;
+    if(!url) {
+        url = "http://instagram.com/api/";
+    }
+    $.post(url, username, password);
+};
+apiRequest(data);
+            </code></pre>
+        </section>
+
+        <section>
+            <h2><em>Destructuring</em> (ES6)</h2>
+            <pre><code data-trim class="javascript">
+var data = {
+    "url": "http://twitter.com/api/",
+    "username": "diofeher",
+    "password": "javascript"
+};
+
+function apiRequest(data) {
+    var { url, username, password } = data;
+    if(!url) {
+        url = "http://instagram.com/api/";
+    }
+    $.post(url, username, password);
+};
+apiRequest(data);
+            </code></pre>
+        </section>
+
+         <section>
+            <h2>Argumentos <em>default</em> (ES5)</h2>
+            <pre><code data-trim class="javascript">
+var myFunction = function(a, b, c){
+    a = a || 10;
+    b = b || 5;
+    c = c || 8;
+    return a * b * c;
+};
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Argumentos <em>default</em> (ES6)</h2>
+            <pre><code data-trim class="javascript">
+var myFunction = function(a=10, b=5, c=8){
+    return a * b * c;
+};
+            </code></pre>
+        </section>
+
+       <section>
+            <h2><em>Super</em> keyword (ES5)</h2>
+            <pre><code data-trim class="javascript">
+var myBaseObj = {
+    sayName: function(){
+        // .. do something
+    };
+};
+
+var mySubObj = Framework.extend(myBaseObj, {
+    sayName: function(){
+        this._super.apply(this, arguments);
+        // .. do something else
+    }
+})
+            </code></pre>
+        </section> 
+
+        <section>
+            <h2><em>Super</em> keyword (ES6)</h2>
+            <pre><code data-trim class="javascript">
+var myBaseObj = {
+    sayName: function(){
+        // .. do something
+    };
+};
+var mySubObj = {
+    __proto__: myBaseObj,
+    sayName: function(){
+        super.sayName();
+        // .. do something else
+    }
+})
+            </code></pre>
+        </section>
+
+         <section>
+            <h2><em>Hoisting</em></h2>
+            <pre><code data-trim class="javascript">
+x = 5; // Assign 5 to x
+
+elem = document.getElementById("demo"); // Find an element 
+elem.innerHTML = x;                     // Display x in the element
+var x; // Declare x
+            </code></pre>
+        </section>
+
+        <section>
+            <h2>Problemas com <em>Hoisting</em></h2>
+            <pre><code data-trim class="javascript">
+var anchors = document.getElementsByTagName(“a”);
+for(var i=0, len=anchors.length; i < len; i++) {
+    anchors[i].onclick = function(){
+        alert(i);  // alert 10 ten times
+    };
+}
+            </code></pre>
+        </section> 
+
+        <section>
+            <h2>Usando <em>closures</em> para resolver o problema</h2>
+            <pre><code data-trim class="javascript">
+var anchors = document.getElementsByTagName(“a”);
+for(var i=0, len=anchors.length; i < len; i++) {
+    anchors[i].onclick = (function(i){
+        return function() {
+            alert(i);  // alert 10 ten times
+        }
+    })(i);
+}
+            </code></pre>
+            <p>Código ruim de ler e estranho para pessoas novas na linguagem</p>
+        </section> 
+
+        <section>
+            <h2><em>Block scoping</em> usando <em>let</em></h2>
+            <pre><code data-trim class="javascript">
+var anchors = document.getElementsByTagName(“a”);
+for(let i=0,len=anchors.length; i < len; i++){
+    anchors[i].onclick = function(){
+        alert(i);
+    }
+}
+            </code></pre>
+        </section> 
+
+        <section>
+            <h2><em>const</em> para variáveis <em>read-only</em></h2>
+            <pre><code data-trim class="javascript">
+const API_KEY = '123lkdsfj43ojisKOD21a';
+const CONFIG = {
+    TEMPLATES_URL: '/templates',
+    TIMEZONE:  'America/Recife'
+}
+CONFIG['TEMPLATES_URL'] = 'http://s3.amazon.com/templates-folder';
+            </code></pre>
+        </section> 
+
+        <section>
+            <h1>ES6: Muito mais!</h1>
+            <ul>
+                <li>Promises</li>
+                <li>Iterators</li>
+                <li>Generators</li>
+                <li>Classes</li>
+            </ul>
+            <p>...</p>
+        </section>
+
+    
+        <section data-background="images/theend.jpg">
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
