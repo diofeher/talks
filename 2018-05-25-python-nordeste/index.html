@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
 
-    <base href="http://www.diofeher.net/talks/2018-05-25-python-nordeste/" target="_blank">
-      
+    <base href="http://www.diofeher.net/talks/" target="_blank">
+
     <title>Utilizando Python para resolver questões de Capture The Flag</title>
 
     <meta name="description" content="Utilizando Python para resolver questões de Capture The Flag">
@@ -36,6 +36,20 @@
     <![endif]-->
 </head>
 
+<!-- <style>
+div.slides {
+    left:0% !important;
+}
+
+.reveal pre {
+    width:120%;
+    line-height:2.2em;
+}
+.reveal section pre code {
+    font-size: 1.7em !important;
+}
+</style> -->
+
 <body>
     <div class="reveal">
         <!-- Any section element inside of this container is displayed as a slide -->
@@ -54,9 +68,8 @@
             <section>
                 <h1>Quem sou eu</h1>
                 <ul>
-                    <li>Formado em Tecnologia de Sistemas para Internet no IFPB</li>
-                    <li>Desenvolvedor Full-stack desde 2009</li>
-                    <li>Trabalhando com Blockchain desde Outubro de 2017</li>
+                    <li>Formado em Tecnologia em Sistemas para Internet no IFPB</li>
+                    <li>Trabalho com Blockchain desde Outubro de 2017</li>
                     <li>Jogo com a equipe
                         <a href="http://fireshellsecurity.team">FireShell</a> desde Fevereiro de 2018</li>
                     <li>
@@ -68,6 +81,9 @@
                 </ul>
             </section>
 
+            <section data-background="images/ranking.jpg" data-background-size="contain">
+            </section>
+
             <section>
                 <h1>Desafio</h1>
                 <ol>
@@ -76,13 +92,29 @@
                     <li>Programação</li>
                 </ol>
                 <p>
-                    <a href="http://cyberpunk-hacker.herokuapp.com">cyberpunk-hacker.herokuapp.com</a>
+                    <p>
+                        <a href="http://cyberpunk-hacker.herokuapp.com">http://cyberpunk-hacker.herokuapp.com</a>
+                    </p>
+                    <p><a href="http://10.100.9.133
+                    ">http://10.100.9.133</a></p>
                 </p>
             </section>
 
             <section data-background="images/cs.jpg">
                 <h1>O que é CTF?</h1>
             </section>
+
+            <section>
+                <h1>GIVE ME THE FLAGS!</h1>
+                <p>Geralmente em Leet (1337) ou em hash</p>
+                <ul>
+                    <li>RCTF{El_PsY_CONGRO0_sg0}</li>
+                    <li>sun{45k_4nd_y3_5h411_r3c31v3}</li>
+                    <li>flag{H0p3_y0u_R3g!5t3r}</li>
+                    <li>flag{6470e394cbf6dab6a91682cc8585059b}</li>
+                </ul>
+            </section>
+
 
             <section>
                 <h2>Comumente são dois tipos (existem outras variantes)</h2>
@@ -109,6 +141,7 @@
                     <li>Engenharia Reversa (Rev)</li>
                     <li>Forense</li>
                     <li>PPC (Professional Programming and Coding)</li>
+                    <li>Misc</li>
                 </ul>
             </section>
 
@@ -120,17 +153,25 @@
             </section>
 
             <section>
-                <h2>Ataques comuns</h2>
+                <h2>Ataques</h2>
                 <ul>
                     <li>Cross-Site scripting</li>
-                    <li>SSRF</li>
+                    <li>LFI (Local File Inclusion)</li>
                     <li>SQL Injection</li>
                     <li>Timing Attack</li>
-                  </ul>
+                    <li>Muitos outros...</li>
+                </ul>
+            </section>
+
+            <section>
+                <h1>Timing Attack - Demonstração</h1>
+                <a href="http://localhost:9000/">Localhost:9000</a>
             </section>
 
             <section data-background="images/rails.jpg">
-                <h1><a href="https://github.com/rails/rails/commit/17e6f1507b7f2c2a883c180f4f9548445d6dfbda">Github PR</a></h1>
+                <h1>
+                    <a href="https://github.com/rails/rails/commit/17e6f1507b7f2c2a883c180f4f9548445d6dfbda">Github PR</a>
+                </h1>
             </section>
 
             <section>
@@ -138,13 +179,76 @@
             </section>
 
             <section>
-                <h2>Ataques comuns</h2>
+                <h2>Tipos</h2>
                 <ul>
-                    <li>Cross-Site scripting</li>
-                    <li>SSRF</li>
-                    <li>SQL Injection</li>
-                    <li>Timing Attack</li>
+                    <li>Cifra de César</li>
+                    <li>Cifra de Vigenere</li>
+                    <li>Encodings (base16, 32, 64...)</li>
+                    <li>AES</li>
+                    <li>RSA</li>
+                    <li>Diffie-Hellman</li>
+                    <li>Curvas Elipticas</li>
                 </ul>
+            </section>
+
+            <section>
+                <h1>Cifra de César</h1>
+            </section>
+
+            <section data-background="images/caesar.jpg" data-background-size="contain">
+            </section>
+
+            <section>
+                <h2>ROT 3</h2>
+                <pre><code data-trim class="python">
+>>> text = "PYTHONNORDESTE"
+>>> [i for i in text]
+['P', 'Y', 'T', 'H', 'O', 'N', 'N', 'O', 'R', 'D', 'E', 'S', 'T', 'E']
+>>> [ord(i) for i in text]
+[80, 89, 84, 72, 79, 78, 78, 79, 82, 68, 69, 83, 84, 69]
+>>> [ord(i)+3 for i in text]
+[83, 92, 87, 75, 82, 81, 81, 82, 85, 71, 72, 86, 87, 72]
+>>> [chr(ord(i)+3) for i in text]
+['S', '\\', 'W', 'K', 'R', 'Q', 'Q', 'R', 'U', 'G', 'H', 'V', 'W', 'H']
+                    </code></pre>
+            </section>
+
+            <section>
+                <h2>Encrypt</h2>
+                <pre><code data-trim class="python">
+ROT = 3
+
+def encrypt_ceasar(text):
+    plain = ""
+    for c in text:
+        value = ord(c) + ROT
+        if value > 90:
+            value = value - 26
+        plain += chr(value)
+    return plain
+
+>>> print encrypt_ceasar("PYTHONNORDESTE")
+SBWKRQQRUGHVWH
+</code></pre>
+            </section>
+
+            <section>
+                <h2>Decrypt</h2>
+                <pre><code data-trim class="python">
+ROT = 3
+
+def decrypt_ceasar(text):
+    plain = ""
+    for c in text:
+        value = ord(c) - ROT
+        if value < 65:
+            value = value + 26
+        plain += chr(value)
+    return plain
+
+>>> print decrypt_ceasar("SBWKRQQRUGHVWH")
+PYTHONNORDESTE
+    </code></pre>
             </section>
 
             <section>
@@ -152,43 +256,52 @@
             </section>
 
             <section>
-                <h2>Ataques comuns</h2>
+                <h2>Tipos</h2>
                 <ul>
-                    <li>Cross-Site scripting</li>
-                    <li>SSRF</li>
-                    <li>SQL Injection</li>
-                    <li>Timing Attack</li>
+                    <li>Algoritmos de busca</li>
+                    <li>Estruturas de dados</li>
+                    <li>Teorias dos números</li>
+                    <li>Análises de String</li>
+                    <li>Grafos</li>
                 </ul>
             </section>
 
-            <section>
-                <h2>Argumentos
-                    <em>default</em> (ES5)</h2>
-                <pre><code data-trim class="javascript">
-    var myFunction = function(a, b, c){
-        a = a || 10;
-        b = b || 5;
-        c = c || 8;
-        return a * b * c;
-    };
-                </code></pre>
-            </section>
-
+            <section data-background="images/bugueval.jpg" data-background-size="contain"></section>
 
             <section>
-                <h2>Argumentos
-                    <em>default</em> (ES5)</h2>
-                <pre><code data-trim class="javascript">
-var myFunction = function(a, b, c){
-    a = a || 10;
-    b = b || 5;
-    c = c || 8;
-    return a * b * c;
-};
-            </code></pre>
+                <h2>Conectando sockets</h2>
+                <pre><code data-trim class="python">
+import nclib
+</code></pre>
             </section>
 
-            <section data-background="images/theend.jpg">
+            <section data-background="images/nclib.jpg" data-background-size="contain"></section>
+
+            <section>
+                <h2>Resolução</h2>
+                <pre><code data-trim class="python">
+def main():
+    nc = nclib.Netcat(('159.65.181.58', 31813), verbose=True)
+    nc.recv()
+    nc.send('start')
+    while True:
+        nc.read_until('E:')
+        equation = nc.read_until(')')
+        result = parse_equation(equation)
+        nc.send(str(result)+'\n')
+        print nc.recv(1024)
+
+
+main()
+                            </code></pre>
+            </section>
+
+            <section>
+                <h2>Demonstração de código PPC rodando</h2>
+            </section>
+
+            <section>
+                <h1>Fim! Perguntas?</h1>
             </section>
         </div>
     </div>
