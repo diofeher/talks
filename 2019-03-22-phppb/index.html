@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Segurança em PHP - como explorar e se defender usando recursos da linguagem</title>
+
+    <meta name="description" content="Utilizando Python para resolver questões de Capture The Flag">
+    <meta name="author" content="Diógenes Fernandes">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="reveal">
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1>Segurança em PHP</h1>
+                <h2>Como explorar e se defender usando recursos da linguagem</h2>
+                <p>
+                    <small>
+                        <a href="http://www.diofeher.net/">Diógenes Fernandes</a> /
+                        <a href="http://twitter.com/diofeher">@diofeher</a>
+                    </small>
+                </p>
+            </section>
+
+            <section>
+                <h1>Quem sou eu</h1>
+                <ul>
+                    <li>Formado em TSI no IFPB</li>
+                    <li>Jogo na equipe
+                        <a href="http://fireshellsecurity.team">FireShell</a> desde Fev/2018 (8º lugar mundial)</li>
+                    <li>
+                        Eng. de Software Senior na <a href="http://expertlead.com">ExpertLead</a>
+                    </li>
+                    <li>
+                        <a href="http://twitter.com/diofeher">http://twitter.com/diofeher</a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://www.youtube.com/channel/UCOCOSHBTtaFEJYzlYjo8Zlw">https://www.youtube.com/channel/UCOCOSHBTtaFEJYzlYjo8Zlw</a>
+                    </li>
+                </ul>
+            </section>
+
+
+            <section>
+                <h1>Introdução</h1>
+                <ul>
+                    <li class="fragment">Não sou desenvolvedor PHP</li>
+                    <li class="fragment">Questões de <i>CTF</i></li>
+                    <li class="fragment">Vulnerabilidades antigas/fáceis de achar</li>
+                    <li class="fragment">Falha no processo de desenvolvimento (Falta de conhecimento / Negligência)</li>
+                </ul>
+            </section>
+
+            <section data-background="images/ctftime.jpg" data-background-size="100%">
+            </section>
+
+            <section data-background="images/ctf1.jpg" data-background-size="90%">
+            </section>
+
+            <section>
+                <h1>SQL Injection</h1>
+            </section>
+
+            <section>
+                <pre><code>
+ mysqli_query($db,
+    "SELECT * FROM users WHERE username='" +
+    $_POST["username"] +
+    "' AND password='" +
+    $_POST["pass"] + "' LIMIT 1"
+ );
+                </code></pre>
+            </section>
+
+            <section>
+                <pre><code>
+  SELECT *
+    FROM users
+   WHERE username = 'diofeher'
+     AND password = 'Nao_sei_a_senha' LIMIT 1
+    </code></pre>
+            </section>
+
+            <section data-background="images/sql_1.jpg" data-background-size="100%">
+            </section>
+
+            <section>
+                <pre>
+        <code>
+  SELECT *
+    FROM users
+   WHERE username = 'diofeher'
+     AND password = '' or 1=1--' LIMIT 1
+        </code>
+    </pre>
+            </section>
+
+            <section data-background="images/sql_2.jpg" data-background-size="100%">
+            </section>
+
+
+            <section data-background="images/hackerman.gif" data-background-size="100%">
+            </section>
+
+            <section>
+                <h1>Como resolver?</h1>
+                <h2 class="fragment">Usem queries parametrizadas!</h2>
+            </section>
+
+            <section>
+                <pre>
+                <code>
+        if ($stmt = $mysqli_prepare("SELECT * FROM users
+        WHERE username=? AND password=? LIMIT 1")) {
+
+            $stmt->bind_param("ss", $username, $password);
+        ....
+                </code>
+            </pre>
+            </section>
+
+            <section data-background="images/sql_injection.jpg" data-background-size="100%">
+            </section>
+
+            <section>
+                <h1>Command Execution</h1>
+            </section>
+
+            <section data-background="images/ce0.jpg" data-background-size="90%">
+            </section>
+
+            <section>
+                <pre>
+                        <code>
+    if (isset($_GET['domain'])) {
+        echo '<pre>';
+        $domain = $_GET['domain'];
+        $lookup = system("nslookup {$domain}");
+        echo($lookup);
+        echo '</pre>';
+    }
+                </code>
+                </pre>
+            </section>
+
+            <section data-background="images/ce1.jpg" data-background-size="58%">
+            </section>
+
+            <section data-background="images/ce2.jpg" data-background-size="58%">
+            </section>
+
+
+            <section>
+                <h1>Como se prevenir?</h1>
+                    <ul>
+                        <li>O ideal é não utilizar chamadas à linha de comando</li>
+                        <li>Utilizar uma shell com poucas permissões</li>
+                        <li>Restringir os comandos utilizados</li>
+                        <li>Se utilizar escapar caracteres</li>
+                        <li>escapeshellarg() ou escapeshellcmd()</li>
+                    </ul>
+                    <pre>
+                        <code>
+                                ;
+                                &
+                                |
+                                `
+                        </code>
+                    </pre>
+                </section>
+
+
+            <section>
+                <h1>Type Juggling</h1>
+            </section>
+
+            <section>
+                <pre>
+                    <code>
+    php > echo 1 === '1';
+    php > echo 1 == '1';
+    1
+                    </code>
+                </pre>
+            </section>
+
+
+            <section data-background="images/strict.jpg" data-background-size="100%">
+            </section>
+
+            <section data-background="images/loose.jpg" data-background-size="100%">
+            </section>
+
+            <section>
+                <pre>
+            <code>
+$payload = json_decode(base64_decode($payload), true);
+if ($payload['mac'] != hash_hmac('sha256', $payload['value'], $this->key))
+    throw new DecryptException("MAC for payload is invalid.");
+            </code>
+        </pre>
+            </section>
+
+            <section>
+                <pre>
+                    <code>
+    ▪ "7a5c2...72c933" == int(7)
+    ▪ "68f66...8229bb" == int(68)
+    ▪ "092d1...c410a9" == int(92)
+                    </code>
+                </pre>
+            </section>
+
+            <section>
+                <pre>
+                <code>
+        {
+            "iv": "137f87545d8d2f994c65a6f336507747",
+            "value": "c30fbe54e025b2a509db7a1fc174783c35d023199f9a0e24ae23a934277aec66"
+            "mac": 68
+        }
+                </code>
+                        </pre>
+            </section>
+
+
+
+            <section data-background="images/whoa.gif" data-background-size="100%">
+            </section>
+
+
+            <section>
+                <h1>Como resolver?</h1>
+                <li class="fragment">Utilizem === e !== como comparadores padrões!
+                </li>
+            </section>
+
+
+            <section>
+                <h1>Cross-Site Scripting</h1>
+            </section>
+
+            <section>
+                <pre><code>
+    $username = "diofeher";
+    $element = "Hello " + username + "!! Welcome to PHP-PB 2019!";
+    echo $element;  // Hello diofeher!! Welcome to PHP-PB 2019!!
+            </code></pre>
+            </section>
+
+            <section>
+                <pre><code>
+    $username = '&lt;script type=&quot;text/javascript&quot;&gt;alert(1)&lt;/script&gt;';
+    $element = "Hello " + username + "!! Welcome to PHP-PB 2019!";
+    echo $element;
+    // Hello &lt;script type=&quot;text/javascript&quot;&gt;alert(1)&lt;/script&gt;!! Welcome to PHP-PB 2019!!
+            </code></pre>
+            </section>
+
+            <section>
+                    <h1>Tipos</h1>
+                    <ul>
+                        <li>Reflected</li>
+                        <li>Stored</li>
+                    </ul>
+                </section>
+
+
+            <section data-background="images/xss-attack.png" data-background-size="100%">
+            </section>
+
+            <section data-background="images/dd_tank0.jpg" data-background-size="100%">
+            </section>
+
+            <section data-background="images/dd_tank1.jpg" data-background-size="100%">
+            </section>
+
+            <section data-background="images/dd_tank2.jpg" data-background-size="100%">
+            </section>
+
+            <section data-background="images/gg.gif" data-background-size="100%">
+            </section>
+
+            <section>
+                <h1>Como resolver?</h1>
+                <li class="fragment">Nunca confiem no input do usuário!
+                </li>
+                <li class="fragment">htmlspecialchars()</li>
+                <li class="fragment">Permissiva (whitelist) > Restritiva (blacklist)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h1>Fim! Perguntas?</h1>
+                <h3>Podem me contatar no twitter/telegram</h3>
+                <h3>@diofeher</h3>
+            </section>
+        </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+            // Optional reveal.js plugins
+            dependencies: [{
+                    src: 'lib/js/classList.js',
+                    condition: function () {
+                        return !document.body.classList;
+                    }
+                },
+                {
+                    src: 'plugin/markdown/marked.js',
+                    condition: function () {
+                        return !!document.querySelector('[data-markdown]');
+                    }
+                },
+                {
+                    src: 'plugin/markdown/markdown.js',
+                    condition: function () {
+                        return !!document.querySelector('[data-markdown]');
+                    }
+                },
+                {
+                    src: 'plugin/highlight/highlight.js',
+                    async: true,
+                    callback: function () {
+                        hljs.initHighlightingOnLoad();
+                    }
+                },
+                {
+                    src: 'plugin/zoom-js/zoom.js',
+                    async: true
+                },
+                {
+                    src: 'plugin/notes/notes.js',
+                    async: true
+                }
+            ]
+        });
+    </script>
+
+</body>
+
+</html>
