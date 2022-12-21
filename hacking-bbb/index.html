@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Hacking Big Brother Brazil Voting System</title>
+
+    <meta name="description" content="Utilizando Python para resolver questões de Capture The Flag">
+    <meta name="author" content="Diógenes Fernandes">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+</head>
+
+<style>
+body {
+    background-color: #54358C;
+}
+</style>
+
+<body>
+    <div class="reveal">
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1>Hacking Big Brother Brazil's Voting</h1>
+                <p>
+                    <small>
+                        <a href="http://www.diofeher.net/">Diógenes Fernandes</a> /
+                        <a href="http://twitter.com/diofeher">@diofeher</a>
+                    </small>
+                </p>
+            </section>
+
+            <section>
+                <h1>$whoami</h1>
+                <ul>
+                    <li>CTF Player
+                        <a href="https://fireshellsecurity.team">FireShell</a> since Fev/2018</li>
+                    <li>
+                        Platform Engineer at <a href="https://shopify.com/en/">Shopify</a>
+                    </li>
+                    <li>
+                        Videos about security and programming at <a href="https://www.youtube.com/channel/UCOCOSHBTtaFEJYzlYjo8Zlw">
+                            Youtube
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>v1 - Selenium + OpenCV</h2>
+            </section>
+
+            <section>
+                <video data-autoplay loop src="videos/01-daniel.mp4"></video>
+            </section>
+
+            <section>
+                <h2>Login</h2>
+                <pre><code>
+    const login = async (page, email, password) => {
+        page.goto(links.globoLoginURL, {
+            waitUntil: "networkidle2"
+        });
+
+        await page.waitForSelector('#login');
+        await page.type('#login', email);
+        await page.type('#password', password);
+
+        await page.click('[class="button ng-scope"]');
+    }
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Downloading captcha images (hook)</h2>
+                <pre><code>
+    if (hookUrl.startsWith(links.captchaURL)) {
+        const res = await response.json();
+        const { symbol: icon, image } = res.data;
+        fs.writeFile(
+            `./src/images/${icon}.png`,
+            image, "base64", (err) => {});
+
+        await votar(page, icon);
+    }
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Chamando o script em python</h2>
+                <pre><code>
+    childProcess.execSync(
+        `python ./src/compare_images.py "${iconText}"`
+    )
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Standardizing captcha images</h2>
+                <img src="images/compare_captcha.jpg" />
+            </section>
+
+
+            <section>
+                <h2>SIFT (Scale-Invariant Feature Transform)</h2>
+                <img src="images/sift.jpg" />
+            </br>
+                
+            <span>Features; Use euclidian distances between features;</span>
+            </section>
+
+            <section>
+                <h2>Image "Database"</h2>
+                <img src="images/compare_db.jpg" />
+            </section>
+
+             <section>
+                <h2>Match</h2>
+                <pre><code>
+    matcher = cv2.xfeatures2d.SIFT_create(nfeatures=100)
+    kp1, des1 = matcher.detectAndCompute(img1,None)
+    kp2, des2 = matcher.detectAndCompute(img2,None)
+
+    bf = cv2.BFMatcher()
+    matches = bf.match(des1, des2)
+
+    matches = sorted(matches, key=lambda val: val.distance)
+    score = sum([i.distance for i in matches])
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Problems?</h2>
+                <ul>
+                    <li>What if CSS classes or HTML changes on runtime?</li>
+                    <li>What if I want to scale? (multiple Chromium instances)</li>
+                    <li>Strange DOM bugs on Puppeteer</li>
+                </ul>
+            </section>
+
+            <section>
+                <img src="images/youtube.jpg" />
+            </section>
+
+
+            <section>
+                <h2>v2 - Requests + OpenCV</h2>
+            </section>
+
+            <section>
+                <video data-autoplay loop src="videos/02-v2.mp4"></video>
+            </section>
+
+            <section>
+                <h2>Arquitetura</h2>
+                <img style="width: 900px" src="images/arquitetura.jpg" />
+            </section>
+
+            <section>
+                <h2>Requesting to the voting system</h2>
+                <pre><code>
+    POOL = '9489daaa-15ee-4a2e-8e8d-22391a58e23c'
+    ROYALE_URL = 'royale.globo.com'
+
+    response = self.session.post(
+        f'https://{ROYALE_URL}/polls/{POOL}/session',
+        params=params,
+        headers=headers
+    )
+
+    response_data = response.json()
+    self.symbol = response_data['data']['symbol']
+    self.captchaSessionToken = response_data['sessionToken']
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Requesting to the captcha system</h2>
+                <pre><code>
+    response = self.session.post(
+        'https://captcha.globo.com/api/challenge/generate',
+        params=params,
+        headers=headers
+    )
+
+    response_data = response.json()
+    self.symbol = response_data['data']['symbol']
+    self.captchaSessionToken = response_data['sessionToken']
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Proof of Work</h2>
+                <img style="background-color: #fff" src="images/pow.png" />
+            </section>
+
+            <section>
+                <h2>Proof of Work</h2>
+                <pre><code>
+    break_pow('FIKHSU3LH2JSJK7VJHTVHVZDQM;5', 5) == 379107
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Proof of Work</h2>
+                <pre><code>
+    def break_pow(hashcash, zeroes):
+        match = "0" * int(zeroes)
+        count = 0
+        while True:
+            count += 1
+            h = hashlib.sha1(f'{hashcash}{count}'.encode('utf-8'))
+            if h.hexdigest().startswith(match):
+                return count
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Concurrency - Manager</h2>
+                <pre><code>
+    class AccountManager(object):
+        self.accounts = accs
+        self.q = Queue(maxsize=MAX_CONNS)
+
+    def run(self):
+        t1 = Thread(
+            target=consumer,
+            args=(self.q, self.accounts, self.participant)
+        ); t1.start();
+        for _, creds in self.accounts.items():
+            t2 = Thread(
+                target=producer,
+                args=(self.q, creds, self.participant)
+            )
+            t2.start()
+                </code></pre>
+            </section>
+
+            <section>
+                <h2>Concurrency - Producer</h2>
+                <pre><code>
+def producer(out_q, data, participant):
+    username = data['username']
+    password = data['password']
+    semaphore.acquire()
+    try:
+        bot = UserBot(username, password, participant)
+        bot.run()
+    except Exception as e:
+        print(f"{Fore.RED} Teve erro em {username}. {e} Testando com outro usuário...")
+            </pre></code>
+            </section>
+
+                        <section>
+                <h2>Concorrência - Consumer</h2>
+                <pre><code>
+def consumer(in_q, accounts, participant):
+    while True:
+        username = in_q.get()
+        accounts[username]['timestamp'] = datetime.datetime.now()
+        for username, creds in accounts.items():
+            diff = datetime.datetime.now() - creds['timestamp']
+            if diff.seconds > RETRY_TIME:
+                Thread(
+                    target=producer,
+                    args=(in_q, creds, participant)
+                ).start()
+            </pre></code>
+            </section>
+
+            <section>
+                <h2>Artificial Intelligence (?)</h2>
+                <img style="background-color: #fff" src="images/ia.jpg" />
+            </section>
+
+            <section>
+                <h2>Advantages?</h2>
+                <ul>
+                    <li>Only Python</li>
+                    <li>Easy to scale (multi-thread)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Disadvantages?</h2>
+                <ul>
+                    <li>Need to reverse engineer the whole front-end</li>
+                    <li>Small changes to the architecture breaks the code</li>
+                    <li>Harder to install (multiple dependencies)</li>
+                    <li>Harder to distribute (it was a pain to generate a windows build)</li>
+                    <li>Small reach due to be technically harder to use</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Google Chrome Extension + iFrame</h2>
+            </section>
+
+            <section>
+                <video data-autoplay loop src="videos/03-thelma.mp4"></video>
+            </section>
+
+            <section data-background="images/hackerman.gif" data-background-size="100%">
+            </section>
+
+            <section>
+                <h1>Questions?</h1>
+                <h3>@diofeher</h3>
+            </section>
+        </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+            // Optional reveal.js plugins
+            dependencies: [{
+                    src: 'lib/js/classList.js',
+                    condition: function () {
+                        return !document.body.classList;
+                    }
+                },
+                {
+                    src: 'plugin/markdown/marked.js',
+                    condition: function () {
+                        return !!document.querySelector('[data-markdown]');
+                    }
+                },
+                {
+                    src: 'plugin/markdown/markdown.js',
+                    condition: function () {
+                        return !!document.querySelector('[data-markdown]');
+                    }
+                },
+                {
+                    src: 'plugin/highlight/highlight.js',
+                    async: true,
+                    callback: function () {
+                        hljs.initHighlightingOnLoad();
+                    }
+                },
+                {
+                    src: 'plugin/zoom-js/zoom.js',
+                    async: true
+                },
+                {
+                    src: 'plugin/notes/notes.js',
+                    async: true
+                }
+            ]
+        });
+    </script>
+
+</body>
+
+</html>
